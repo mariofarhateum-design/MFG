@@ -44,7 +44,12 @@
     .next:not(:disabled):active { transform:scale(.97) }
     .note { margin:16px 0 0; min-height:24px; text-align:center; color:var(--muted); font-size:.9rem }
     .reveal { align-self:center; text-align:center; margin:auto 0 }
-    .reveal .hero-shot { display:block; width:min(100%,430px); max-height:300px; object-fit:cover; margin:18px auto 24px; border:1px solid #ffffff35; border-radius:22px; box-shadow:0 16px 45px #0008 }
+    .reveal-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(100%,520px); margin:18px auto 20px }
+    .reveal-shot { position:relative; min-width:0; overflow:hidden; border:1px solid #ffffff35; border-radius:18px; background:#242932; box-shadow:0 12px 35px #0007 }
+    .reveal-shot img { display:block; width:100%; height:clamp(165px,34vw,250px); object-fit:cover }
+    .reveal-shot.motorcycle img { object-fit:contain; background:#fff }
+    .reveal-shot span { position:absolute; left:8px; right:8px; bottom:8px; padding:6px; border-radius:9px; background:#10141bd9; color:#fff; font-size:.78rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase }
+    @media(max-width:420px) { .reveal-gallery { gap:8px } .reveal-shot img { height:clamp(145px,42vw,190px) } .reveal-shot span { font-size:.68rem; left:5px; right:5px } }
     .reveal .shot-caption { display:inline-block; margin-bottom:8px; color:var(--gold); font-size:.8rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase }
     .reveal h1 { max-width:none; margin:16px 0; font-size:clamp(2.4rem,10vw,4.5rem) }
     .reveal p { color:#d3cec5; max-width:34ch; margin:0 auto 24px; font-size:1.12rem }
@@ -153,12 +158,13 @@
       document.querySelector('#stepTag').textContent='Surprise';
       document.querySelector('#progress').style.width='100%';
       document.querySelector('.navigation').style.display='none'; note.style.display='none';
-      content.innerHTML='<div class="reveal"><img class="hero-shot" src="drone-car-shot.png" alt="Blue sports car filmed from above during a drone photoshoot"><span class="shot-caption">A glimpse of your drone shoot</span><div class="eyebrow">You unlocked it</div><h1>Your surprise!</h1><p>You’re getting a <span class="spark">motorcycle and car photoshoot</span>, with <span class="spark">drone footage</span> to capture it all.</p></div>';
+      content.innerHTML='<div class="reveal"><div class="reveal-gallery"><div class="reveal-shot car"><img src="drone-car-shot.png" alt="Blue sports car filmed from above during a drone photoshoot"><span>Car</span></div><div class="reveal-shot motorcycle"><img src="drone-motorcycle.png" alt="Blue and white Suzuki sport motorcycle"><span>Motorcycle</span></div></div><span class="shot-caption">A glimpse of your drone shoot</span><div class="eyebrow">You unlocked it</div><h1>Your surprise!</h1><p>You’re getting a <span class="spark">motorcycle and car photoshoot</span>, with <span class="spark">drone footage</span> to capture it all.</p></div>';
     }
     render();
   </script>
 </body>
 </html>
+
 
 
 
