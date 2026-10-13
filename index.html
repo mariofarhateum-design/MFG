@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10141b">
+  <title>A little surprise</title>
+  <style>
+    :root { color-scheme: dark; --ink:#f5f0e8; --muted:#a7a5a0; --gold:#f5c86b; --panel:#1a202a; --line:#ffffff20; --accent:#f47755; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100svh; display:grid; place-items:center; padding:22px; color:var(--ink); background:radial-gradient(ellipse at 50% -20%,#4a4039 0,#20232b 42%,#10141b 78%); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif }
+    main { width:min(100%,640px); min-height:550px; position:relative; overflow:hidden; display:flex; flex-direction:column; padding:clamp(24px,6vw,48px); border:1px solid var(--line); border-radius:28px; background:linear-gradient(145deg,#202630ed,#171c24f2); box-shadow:0 28px 90px #0008 }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase }
+    .tag { color:var(--gold); border:1px solid #f5c86b55; border-radius:999px; padding:5px 10px; letter-spacing:.02em }
+    .track { height:4px; margin:20px 0 30px; border-radius:9px; overflow:hidden; background:#ffffff15 }
+    .track span { display:block; width:0; height:100%; border-radius:9px; background:linear-gradient(90deg,var(--accent),var(--gold)); transition:width .35s ease }
+    .eyebrow { color:var(--gold); text-transform:uppercase; letter-spacing:.18em; font-size:.76rem; font-weight:700 }
+    h1 { margin:10px 0 8px; max-width:14ch; font-size:clamp(2rem,7vw,3.3rem); line-height:1.08; letter-spacing:-.04em }
+    .hint { color:var(--muted); margin:0 0 30px }
+    .answers { min-height:158px; position:relative; display:flex; flex-wrap:wrap; align-content:flex-start; justify-content:center; align-items:center; gap:12px; padding:8px 0 22px }
+    button { font:inherit; color:inherit; cursor:pointer; touch-action:manipulation }
+    .choice { min-height:54px; padding:12px 22px; border:1px solid var(--line); border-radius:16px; background:#ffffff0a; transition:transform .2s ease,background .2s ease,border-color .2s ease,opacity .2s ease }
+    .choice:hover { background:#ffffff14; border-color:#ffffff40 }
+    .choice.selected { border-color:var(--gold); background:#f5c86b20; box-shadow:0 0 0 2px #f5c86b1a }
+    .choice.correct { border-color:#83d5a0; background:#83d5a020 }
+    .choice.runaway { position:absolute; z-index:2 }
+    .photo-answers { min-height:310px; overflow:hidden; border-radius:22px; isolation:isolate; touch-action:pan-y }
+    .photo-choice { position:relative; display:block; flex:0 0 clamp(105px,27vw,148px); width:clamp(105px,27vw,148px); height:clamp(105px,27vw,148px); min-height:0; padding:0; overflow:hidden; border:2px solid #ffffff70; border-radius:50%; background:#252a30; box-shadow:0 10px 30px #0008,inset 0 0 0 1px #ffffff20; animation:bubbleFloat 3.8s ease-in-out infinite }
+    .photo-choice:nth-child(2) { animation-delay:-1.3s }
+    .photo-choice:nth-child(3) { animation-delay:-2.1s }
+    .photo-choice img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .35s ease }
+    .photo-choice::after { content:""; position:absolute; inset:42% 0 0; background:linear-gradient(transparent,#080a0de8); pointer-events:none }
+    .photo-choice .photo-title { position:absolute; z-index:3; left:4px; right:4px; bottom:18px; display:block; color:#fff; font-weight:800; font-size:1.05rem; line-height:1.2; text-shadow:0 2px 8px #000; text-align:center; pointer-events:none }
+    .both-choice { background-image:linear-gradient(90deg,#0000 47%,#14182070 50%,#0000 53%),url("https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=480&q=80"),url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=480&q=80"); background-size:cover,50% 100%,50% 100%; background-position:center,left center,right center; background-repeat:no-repeat }
+    .photo-choice.runaway { position:absolute; transition:left .12s linear,top .12s linear; animation:bubbleFloat 3.8s ease-in-out infinite }
+    .photo-choice:hover img { transform:scale(1.12) }
+    .photo-choice.selected { border-color:var(--gold) }
+    @keyframes bubbleFloat { 0%,100% { transform:translateY(0) rotate(-2deg) } 50% { transform:translateY(-10px) rotate(2deg) } }
+    .choice.hidden { position:absolute; z-index:1; opacity:0; pointer-events:none }
+    .choice.hidden.revealed { position:relative; opacity:1; pointer-events:auto; transition:opacity .3s ease }
+    .navigation { display:flex; justify-content:flex-end; margin-top:auto; padding-top:16px }
+    .next { min-width:130px; min-height:52px; padding:12px 22px; border:0; border-radius:15px; color:#171719; font-weight:750; background:linear-gradient(120deg,#f5c86b,#f3a85a); transition:filter .2s,opacity .2s,transform .2s }
+    .next:disabled { cursor:not-allowed; opacity:.35; filter:grayscale(.5) }
+    .next:not(:disabled):active { transform:scale(.97) }
+    .note { margin:16px 0 0; min-height:24px; text-align:center; color:var(--muted); font-size:.9rem }
+    .reveal { align-self:center; text-align:center; margin:auto 0 }
+    .reveal .emoji { font-size:4rem; filter:drop-shadow(0 8px 25px #f5a84c45) }
+    .reveal h1 { max-width:none; margin:16px 0; font-size:clamp(2.4rem,10vw,4.5rem) }
+    .reveal p { color:#d3cec5; max-width:34ch; margin:0 auto 24px; font-size:1.12rem }
+    .spark { color:var(--gold) }
+    @media(max-width:420px) { body { padding:12px } main { min-height:min(680px,calc(100svh - 24px)); padding:24px 20px; border-radius:23px } .answers { min-height:185px } .choice { padding-inline:17px } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important } }
+  </style>
+</head>
+<body>
+  <main aria-live="polite">
+    <div class="top"><span>A little surprise</span><span class="tag" id="stepTag">1 of 4</span></div>
+    <div class="track" aria-hidden="true"><span id="progress"></span></div>
+    <section id="content"></section>
+    <div class="navigation"><button class="next" id="next" disabled>Next <span aria-hidden="true">→</span></button></div>
+    <p class="note" id="note" role="status">Choose your answer to continue.</p>
+  </main>
+  <script>
+    const questions = [
+      { title:"Are you ready for your gift?", choices:["Yes","No"], correct:"Yes", hint:"No pressure... well, maybe a little." },
+      { title:"Enter date of birth?", choices:["05/11/1994","Try another date"], correct:"05/11/1994", kind:"date", hint:"Pick the right date to unlock the next clue." },
+      { title:"What do you like more?", choices:["Food","Cars","Ladies"], correct:"Cars", runaway:["Food","Ladies"], photos:{Food:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=480&q=80",Cars:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=480&q=80",Ladies:"lady-bikini.png"}, hint:"One of these answers is a little hard to catch." },
+      { title:"Which one do you like more?", choices:["Cars","Motorcycles"], correct:"Both", reveal:"Both", runaway:["Cars","Motorcycles"], photos:{Cars:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=480&q=80",Motorcycles:"https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=480&q=80"}, hint:"Maybe there’s an answer that covers both..." }
+    ];
+    let index=0, solved=false, quizComplete=false, dodged=0, pointer={x:-1000,y:-1000}, bubbleFrame=0;
+    const content=document.querySelector('#content'), next=document.querySelector('#next'), note=document.querySelector('#note');
+    function render() {
+      if(index>=questions.length) return showReveal();
+      solved=false; dodged=0; next.disabled=true;
+      const q=questions[index];
+      document.querySelector('#stepTag').textContent=`${index+1} of ${questions.length}`;
+      document.querySelector('#progress').style.width=`${index/questions.length*100}%`;
+      const visualClass=q.photos?" photo-answers":"";
+      content.innerHTML=`<div class="eyebrow">Question ${index+1}</div><h1>${q.title}</h1><p class="hint">${q.hint}</p><div class="answers${visualClass}" id="answers"></div>`;
+      const area=document.querySelector('#answers');
+      let choices=[...q.choices];
+      if(q.reveal) choices.push(q.reveal);
+      choices.forEach(label=>{
+        const b=document.createElement('button'); b.className='choice'; b.type='button';
+        if(q.reveal===label) {
+          b.classList.add('photo-choice','both-choice');
+          const title=document.createElement('span'); title.className='photo-title'; title.textContent=label;
+          b.append(title);
+        } else if(q.photos?.[label]) {
+          b.classList.add('photo-choice');
+          const img=document.createElement('img'); img.src=q.photos[label]; img.alt=''; img.draggable=false;
+          const title=document.createElement('span'); title.className='photo-title'; title.textContent=label;
+          b.append(img,title);
+        } else b.textContent=label;
+        b.setAttribute('aria-label',label);
+        if(q.reveal===label) b.classList.add('hidden');
+        b.addEventListener('click',()=>select(b,label));
+        area.append(b);
+      });
+      note.textContent='Choose your answer to continue.';
+      if(q.runaway) setupRunaways(q,area);
+      if(q.kind==='date') setupDate(area,q);
+      next.onclick=()=>{ if(solved){quizComplete=true;if(bubbleFrame)cancelAnimationFrame(bubbleFrame);index++;render()} };
+    }
+    function select(button,label){
+      const q=questions[index];
+      if(q.runaway?.includes(label)) return;
+      if(label!==q.correct){ note.textContent='Not quite — have another look.'; return; }
+      solved=true; next.disabled=false;
+      document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected','correct'));
+      button.classList.add('selected','correct');
+      note.textContent='That’s the one. Next is ready!';
+    }
+    function setupRunaways(q,area){
+      const targets=[...area.querySelectorAll('.choice')].filter(b=>q.runaway.includes(b.getAttribute('aria-label')));
+      const revealTarget=q.reveal?[...area.querySelectorAll('.choice')].find(b=>b.getAttribute('aria-label')===q.reveal):null;
+      targets.forEach((b,i)=>{
+        b.classList.add('runaway');
+        const x=(area.clientWidth-b.offsetWidth)*(i===0?.04:.72), y=area.clientHeight*.32;
+        b.style.left=`${x}px`; b.style.top=`${y}px`; b.dataset.bx=x; b.dataset.by=y;
+        if(q.reveal){
+          b.style.zIndex='2';
+          b.addEventListener('pointerenter',()=>{if(dodged>=2){revealTarget?.classList.add('revealed');note.textContent='Aha! Maybe the answer is both.'}});
+        }
+      });
+      const track=e=>{
+        const r=area.getBoundingClientRect(); pointer={x:e.clientX-r.left,y:e.clientY-r.top};
+        targets.forEach((b,i)=>{
+          const w=b.offsetWidth,h=b.offsetHeight, maxX=Math.max(0,area.clientWidth-w), maxY=Math.max(0,area.clientHeight-h);
+          let x=Number(b.dataset.bx), y=Number(b.dataset.by), dx=x+w/2-pointer.x, dy=y+h/2-pointer.y, d=Math.hypot(dx,dy);
+          const radius=Math.max(145,w*.62);
+          if(d<radius){
+            const ux=d<1?(i%2?1:-1):dx/d, uy=d<1?.3:dy/d;
+            const speed=Math.min(24,Math.max(3,(radius-d)*.22));
+            x=Math.max(0,Math.min(maxX,x+ux*speed)); y=Math.max(0,Math.min(maxY,y+uy*speed));
+            b.dataset.bx=x; b.dataset.by=y; b.style.left=`${x}px`; b.style.top=`${y}px`;
+          }
+        });
+        if(q.reveal){dodged++;if(dodged>=2){revealTarget?.classList.add('revealed');note.textContent='Aha! The answer that fits both is hiding underneath.'}}
+      };
+      area.addEventListener('pointermove',track);
+      area.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)track(t)},{passive:true});
+    }    function setupDate(area,q){
+      const current=area.querySelector('.choice'); current.remove();
+      const wrap=document.createElement('label'); wrap.style.cssText='display:grid;gap:10px;width:min(100%,280px);color:#aaa7a0'; wrap.innerHTML='<span>Date of birth</span>';
+      const input=document.createElement('input'); input.type='date'; input.setAttribute('aria-label','Date of birth'); input.style.cssText='width:100%;min-height:54px;padding:12px 16px;border:1px solid #ffffff35;border-radius:14px;background:#ffffff0a;color:#f5f0e8;font:inherit';
+      input.addEventListener('change',()=>{ if(input.value==='1994-11-05') selectDate(input); else { solved=false;next.disabled=true;note.textContent='That date doesn’t unlock the clue. Try again.' } });
+      wrap.append(input); area.append(wrap);
+      function selectDate(el){ solved=true;next.disabled=false;note.textContent='That’s the one. Next is ready!'; el.style.borderColor='#83d5a0' }
+    }
+    function showReveal(){
+      document.querySelector('#stepTag').textContent='Surprise';
+      document.querySelector('#progress').style.width='100%';
+      document.querySelector('.navigation').style.display='none'; note.style.display='none';
+      content.innerHTML='<div class="reveal"><div class="emoji" aria-hidden="true">🏍️ 🚘 🚁</div><div class="eyebrow">You unlocked it</div><h1>Your surprise!</h1><p>You’re getting a <span class="spark">motorcycle and car photoshoot</span>, with <span class="spark">drone footage</span> to capture it all.</p><div style="font-size:1.3rem" aria-label="celebration">📸 ✨ 🎉</div></div>';
+    }
+    render();
+  </script>
+</body>
+</html>
+
+
+
+
